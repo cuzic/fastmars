@@ -1,0 +1,5 @@
+<p>URL: <%= link_to "twitter oauth", @authorize_url %></p>
+<% form_tag :action => "twitter_authenticate" do %>
+Password: <%= text_field_tag "oauth_verifier" %>
+<%= submit_tag "next" %>
+<% end %>

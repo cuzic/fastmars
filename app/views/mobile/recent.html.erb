@@ -1,0 +1,35 @@
+<h1>recent items</h1>
+  <a name="top">
+  <%= number_link_to 1, "TOP", :anchor => "top" %>
+<% form_tag :action => "list" do %>
+  <% @subs.each_with_index do |sub, i| %>
+  <div style="background-color:white">
+    <%- if i < 8 then -%>
+      <%= number_link_to i+2, sub.feed.title, :anchor => "sub#{sub.id}" %>
+    <%- else -%>
+      <%= link_to sub.feed.title, :anchor => "sub#{sub.id}" %>
+    <%- end -%>
+  </div>
+<% end %>
+*<input name="submit" type="submit" value="next" accesskey="*"/>
+#<input name="reset" type="reset" value="reset" accesskey="#"/>
+<%= number_link_to(0, "index", :action => "index") %>
+<%- i = 0 -%>
+<% @subs.each do |sub| %>
+  <a name="sub<%= sub.id %>" id="sub<%= sub.id %>">
+    <h2><%=h sub.feed.title %></h2>
+  </a>
+  <% items = sub.feed.items.find :all, :conditions => ["created_on > ?", 2.days.ago],
+    :order => "created_on DESC, id DESC" %>
+<%- items.each do |item| -%>
+  <%- next if item.title =~ /^PR/ -%>
+  <%- if i.even? then style = " style=\"background-color: #c0c0c0;\"" end -%>
+  <%- i += 1 -%>
+  <div<%= style %>>
+  <%- item_member = ItemMembers.find_by_item_id_and_member_id item.id, @member_id -%>
+  <%= item_member.view_count rescue "" -%>
+  <%= check_box_tag "item_id[#{"%03d-%09d" % [i, item.id]}]" %> <%= link_to item.title, item.link %>
+  </div>
+ <%- end -%>
+<%- end -%>
+<% end %> 

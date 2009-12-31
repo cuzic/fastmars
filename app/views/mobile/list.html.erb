@@ -1,0 +1,29 @@
+<%= number_link_to 0, "index", :action => "index" %>
+<%= number_link_to 1, "recent", :action => "recent" %>
+<%= number_link_to 3, "next", "page_num" => @page_to_show + 1 %>
+<a name="top" id="top"/>
+<% indexes = 4..9 %>
+<% form_tag :action => "accept_bugreport" do %>
+<% @items_to_show.zip(@htmls, indexes.to_a) do |item, html, index| %>
+  <div><%= number_link_to index, item.title,
+    :anchor => "item#{item.id}" %></div>
+<%  end %>
+  <div style="background-color: #f0c0c0;"><font size=-2>
+      <%= number_submit_tag "*", "send bug report" %>
+  </div>
+<% @items_to_show.zip(@htmls) do |item, html| %>
+  <hr/>
+  <div>
+  <a name="item<%= item.id %>" id="item<%= item.id %>">
+  <div style="background-color: #c0c0f0;"><font size=-2>
+    <h3><%=h item.title %></h3>
+  </div>
+  </a>
+  <%= html %>
+  <div style="background-color: #f0c0c0;"><font size=-2>
+  &nbsp; failed? <%= check_box_tag "item_id[#{item.id}]" %> 
+  </div>
+  </font>
+</div>
+<% end %>
+<% end %>

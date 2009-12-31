@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//i-mode group (ja)//DTD XHTML i-XHTML(Locale/Ver.=ja/2.3) 1.0//EN" "i-xhtml_4ja_10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+    <title>Fast MARS: <%= controller.action_name %></title>
+  </head>
+  <body>
+<%- if flash[:notice] -%>
+<div class="notice" style="text-align:center;background-color:#ff9;padding:0.5em">
+<p style="color: green"><%= flash[:notice] %></p>
+</div>
+<%- end -%>
+<%= yield %>
+</body>
+</html>

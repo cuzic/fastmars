@@ -1,0 +1,5 @@
+<%= @item.title %>
+<% form_tag :action => :accept_bugreport, :id => @item.id do %>
+  <%= text_field_tag "comment"%>
+  <%= submit_tag "next"%>
+<% end %>

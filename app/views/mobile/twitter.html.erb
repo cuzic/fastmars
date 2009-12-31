@@ -1,0 +1,22 @@
+<%= number_link_to "*", "update status", :anchor => "update" %>
+
+<% @statuses.each do |status| %>
+  <hr/>
+  <div>
+  <div style="font-size: xx-small;"><%= status.user.screen_name %>: 
+      <% time = Time.parse(status.created_at).getgm + 3600*9 %>
+      <%= time.strftime("%m/%d %H:%M:%S") %></div>
+  <div><%= status.text %></div>
+  </div>
+<% end %>
+<hr/>
+<a name="update" id="update" >update status</a>
+<% form_tag :action => :send_twit do %>
+<%= text_field_tag "twit" %>
+<%= submit_tag "twit" %>
+<% end %>
+<% if @page >= 1 then %>
+  <%= number_link_to 1, "prev", :action => "twitter", "page" => @page - 1 %>
+<% end %>
+  <%= number_link_to 3, "next", :action => "twitter", "page" => @page + 1 %>
+  <%= number_link_to 0, "index", :action => "index" %>
