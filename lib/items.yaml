@@ -955,9 +955,12 @@
 - pageElement: //center
   nextLink: //td/b/following-sibling::a[1]
   url: ^http://(?:www\.)?tefutefu\.jp/bbs/index1\.cgi
-- pageElement: //div[@class="article-main"]/*[not(@class="top-pagination" or local-name()="h2")]
-  nextLink: //ul[@class="top-pagination"]/li/a[@class="here"]/ancestor::li[1]/following-sibling::li[1]/a
-  url: ^http://diamond\.jp/series/[^/]+/(?!bn\.html)
+- pageElement: //div[@id="main-contents"]
+  nextLink: //div[@class="next_p"]/a
+  url: ^http://diamond\.jp/articles/
+- pageElement: //div[@class="article-main"]
+  nextLink: //a[@class="next"]
+  url: ^http://diamond\.jp/series/
 - pageElement: id("image-block tag-block")
   nextLink: //a[@rel="next"]
   url: ^http://natalie\.mu/(?:[^/]+/)*?(?:gallery/ho|hottag/lis)t
@@ -1282,9 +1285,9 @@
   nextLink: //span[@class="pager"]/span[@class="pagerCurrentPage"]/following-sibling::a[1]
   url: ^http://www\.emusic\.com/
   insertBefore: ""
-- pageElement: id("main")/div[@class="section"]
-  nextLink: id("main")/div[@class="section pagination"]/ul/li/a[@class="next"]
-  url: ^http://diamond\.jp/series/[^/]+/bn\.html
+- pageElement: //div[@class='article-main']
+  nextLink: //a[@class="next"]
+  url: ^http://diamond\.jp/series/[^/]+/
 - pageElement: //ul[@class="videolist"][1]
   nextLink: //a[@class="pager-next"][1]
   url: ^http://b\.hatena\.ne\.jp/video(?:$|\?)
@@ -1306,9 +1309,11 @@
     uCJdXQ==
 
   url: ^http://search-voi\.0101\.co\.jp/voi/
-- pageElement: //div[@class="story"]
-  nextLink: //div[@class="next_p"]/a
+- pageElement: //div[@id="articlebody"]
+  nextLink: //a[@class="tonext" and (text()='>>')]
   url: ^http://business\.nikkeibp\.co\.jp/article/
+  headers: 
+    - "Cookie: DEUserID=c0a84913-18380-1231019746-1; NBO_AL=dFk5VB93rmzXCprk78rHr7zgq2Xq4JhoVXfUVMrxEpk%3D; CHL=1; integrate=042300027005003005055010000005040000000000999000000000000005030000000000005015005000000990000000000000; service=000000000100100; passport=w_B73hC9z6_cIyvwmnQ5pA; RSISEG=rssg%3D11228/rssg%3D11229/rssg%3D11217/rssg%3D11219/rssg%3D10962/rssg%3D10810; NE_ID=As1KKIKxmPnXMsX8EjUvcEp1Zf4Eon9720RdLZ6VrN8%3D; IMPASEG=S0%3D11213/S1%3D10777/S2%3D10600/S3%3D10239/S4%3D10910/S5%3D10474/S6%3D10080/S7%3D10179/S8%3D10195/S9%3D10198/S10%3D11216; IMPASEG=S0%3D10988/S1%3D10981/S2%3D10224/S3%3D10045/S4%3D10600/S5%3D10474/S6%3D10179/S7%3D10320/S8%3D10823/S9%3D10198/S10%3D10980; NBO_SS=7z3dMP6ekX7v4VkYQUT90dmtuSTWqdNWI4tdvw8g0ro%3D; NBO_MB=tSFp1K977amMDRIXnw%2BLJzZCh%2BpaOc4Ym4aWRuxZmr8%3D; BPP_PF=1613919; BPP_S3=983e81b9; BPP_EX=359cef8; BPP_S9=b59f6910; rsi_ct=2010_2_28:6"
 - pageElement: id("board")
   nextLink: //ul[@class="next"]/li[last()]/a
   url: ^http://shuugi\.in/(?:[^/]+/)+?comment
@@ -5007,11 +5012,9 @@
   nextLink: "//p[@class=\"page_navi\"]/a[contains(@title,\"\xE6\xAC\xA1\xE3\x83\x9A\xE3\x83\xBC\xE3\x82\xB8\")]"
   url: ^http://yaruomatome\.blog10\.fc2\.com/
   insertBefore: ""
-- pageElement: id("news_con")/node()[following::*[@id="bm_page2"]] | id("centerside")/div[contains(@class, "news_con")]/node()[following::*[@class="bm_page2"]]
-  nextLink: !binary |
-    Ly9hW3RleHQoKT0i5qyh44G477yeIl0=
-
-  url: ^https?://(?:www\.)?toyokeizai\.net/
+- pageElement: //div[@class='news_con']
+  nextLink: //a[@class='next']
+  url: ^http://www\.toyokeizai\.net/
 - pageElement: id("main")/div[contains(@class,"section")]
   nextLink: //div[@class="wp-pagenavi"]/a[last()]
   url: ^http://youtube-spot\.com/

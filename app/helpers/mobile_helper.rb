@@ -8,11 +8,28 @@ module MobileHelper
     '&#57886;', '&#57887;', '&#57888;', '&#57889;',
     '&#57890;', '&#57891;', '&#57892;']
 
+  def emoji_number num
+    case request.mobile
+    when Jpmobile::Mobile::Docomo
+      DOCOMO_NUM[num]
+    when Jpmobile::Mobile::Au
+      %Q|<img localsrc="#{AU_NUM[num]}">| 
+    when Jpmobile::Mobile::Softbank
+      SOFTBANK_NUM[num]
+    end
+  end
+
   def number_link_to(num, title, path)
     return link_to(title, path) unless num
     case request.mobile
     when Jpmobile::Mobile::Docomo
-      DOCOMO_NUM[num] + link_to(title, path, :accesskey => num)
+      link = ""
+      if path.size == 1 and anchor = path[:anchor] then
+        link = "<a href=\"\##{anchor}\" accesskey=\"#{num}\">#{title}</a>"
+      else
+        link = link_to(title, path, :accesskey => num)
+      end
+      DOCOMO_NUM[num] + link
     when Jpmobile::Mobile::Au
       prelude = num.is_a? Integer ? %Q|<img localsrc="#{AU_NUM[num]}">| : num
       prelude + link_to(title, path, :accesskey => num)

@@ -31,12 +31,42 @@ class MobileController < ApplicationController
   end
 
   def recent
-    unless @subs = member.subscriptions.find_all
-      render NOTHING
+    member_id = current_member.id
+
+    sql = <<SQL
+SELECT member_id, items.id AS iid, items.link AS ilink, items.title AS ititle,
+       feeds.id AS fid, feeds.title AS ftitle
+FROM subscriptions, feeds, items
+WHERE subscriptions.member_id = ? AND 
+  subscriptions.feed_id = feeds.id AND
+  items.feed_id = feeds.id AND
+  items.created_on > ?
+ORDER BY subscriptions.feed_id, items.created_on DESC;
+SQL
+    @recordset = Item.find_by_sql [sql, member_id, Time.now - 60*60*24*4]
+
+    item_ids = @recordset.map do |r| r.iid end
+    @subs = @recordset.map do |r|
+      {:id => r.fid, :title => r.ftitle}
+    end.uniq
+    if @subs.empty? then render NOTHING; return; end
+
+    sql2 = <<SQL
+SELECT item_id, view_count 
+FROM item_members
+WHERE item_id IN (?) AND member_id = ? ;
+SQL
+    rs = ItemMembers.find_by_sql [sql2, item_ids, member_id]
+    @view_counts = rs.inject({}) do |h, im|
+      h[im.item_id] = im.view_count
+      h
     end
-    
-    @member_id = current_member.id
+
     session.delete :item_id
+  end
+
+  def last
+    redirect_to current_member.last_url
   end
 
   def list
@@ -49,19 +79,24 @@ class MobileController < ApplicationController
       end
       return
     end
+    current_member.last_url = request.request_uri
+    current_member.save
 
     item_ids = []
     id2order = {}
 
-    params[:item_id].keys.sort.each do |param|
-      order, id = param.split("-").map &:to_i
+    params[:item_id].keys.map do |param|
+       param.split("-").map do |s|
+         s.to_i(36)
+       end
+    end.each do |order, id|
       item_ids << id
       id2order[id] = order
     end
     items = Item.find :all, :conditions => ["id IN (?)" , item_ids],
-        :select => "id, title, link, html, bytesize, created_on"
+       :select => "id, title, link, html, bytesize, created_on"
     item_hash = {}
-    item_ids = []
+    item_ids  = []
     items.each do |item|
       item_hash[item.id] = item
       item_ids << item.id
@@ -69,22 +104,15 @@ class MobileController < ApplicationController
 
     @page_to_show = params[:page_num].to_i || 0
 
-    if @page_to_show < 1 then
-      item_ids.each do |item_id|
-        item_member = ItemMembers.find_or_initialize_by_item_id_and_member_id \
-          item_id, current_member.id
-        item_member.view_count += 1
-        item_member.save
-      end
-    end
-
     slice_num = 3
-    max = 800_000
     cur_page = 0
     size = 0
+    max = 80_000
     si = SiteInfo.new
+
     @htmls = []
     @items_to_show = []
+    @to_be_continued = false
     catch(:break) do
       item_ids.sort_by do |id|
         id2order[id]
@@ -111,16 +139,18 @@ class MobileController < ApplicationController
             item.bytesize = bytesize
             item.save
           end
+          bytesize ||= 0
           size += bytesize
-          if cur_page == @page_to_show and size < max then
+          if cur_page == @page_to_show then
             @htmls << html
             @items_to_show << item
-          elsif max <= size then
+            im = ItemMembers.find_or_create_by_item_id_and_member_id item.id, current_member.id
+            im.view_count += 1
+            im.save
+          end
+          if max <= size then
             if cur_page == @page_to_show then
-              if @htmls.empty? then
-                @htmls << html 
-                @items_to_show << item
-              end
+              @to_be_continued = true
               throw :break
             end
             size = 0
@@ -134,6 +164,11 @@ class MobileController < ApplicationController
   end
 
   def accept_bugreport
+    if params[:item_id].nil?
+      rediect_to :action => list
+      return
+    end
+
     ids = params[:item_id].keys
     member_id = current_member.id
     ids.each do |item_id|
@@ -163,15 +198,22 @@ class MobileController < ApplicationController
 
   def twitter_list
     rubytter = current_rubytter
-    @statuses = []
     filename = File.join(RAILS_ROOT, "config", "twitter.yaml")
     tw = YAML::load(open(filename).read)
     @page = params["page"].to_i || 0
     pagenum = tw["PAGE_NUM"]
+
+    @statuses = []
+    retry_count = 0
     1.upto(pagenum) do |i|
       num = @page*pagenum + i
-      rubytter.friends_timeline(:page => num).inject([]) do |s, status|
-        @statuses << status
+      begin 
+        rubytter.friends_timeline(:page => num).each do |status|
+          @statuses << status
+        end
+      rescue
+        retry_count += 1
+        retry if retry_count < 2
       end
     end
   end
@@ -191,7 +233,7 @@ class MobileController < ApplicationController
 
   def send_twit
     if params[:twit] then
-      rubytter = _current_rubytter
+      rubytter = current_rubytter
       msg = params[:twit]
       rubytter.update msg
     end

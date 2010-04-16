@@ -1,5 +1,5 @@
 <h1>Mobile#items</h1>
-  <a name="top">
+  <a name="top" id="top" />
   <%= number_link_to 1, "TOP", :anchor => "top" %>
 <% form_tag :action => "list" do %>
   <% @subs.each_with_index do |sub, i| %>
@@ -15,7 +15,7 @@
 #<input name="reset" type="reset" value="reset" accesskey="#"/>
 <%= number_link_to(0, "index", :action => "index") %>
 <% @subs.each do |sub| %>
-  <a name="sub<%= sub.id %>">
+  <a name="sub<%= sub.id %>" id="sub<%= sub.id %>">
   <h2><%=h sub.feed.title %></h2>
   <% items = sub.feed.items.find :all,
     :order => "created_on DESC, id DESC" %>

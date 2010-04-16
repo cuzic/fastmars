@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20091225084054) do
+ActiveRecord::Schema.define(:version => 20100407235309) do
 
   create_table "bug_reports", :force => true do |t|
     t.integer  "member_id"
@@ -112,6 +112,7 @@ ActiveRecord::Schema.define(:version => 20091225084054) do
     t.string   "ident"
     t.string   "twitter_access_token"
     t.string   "twitter_access_token_secret"
+    t.text     "last_url"
   end
 
   add_index "members", ["username"], :name => "index_members_on_username", :unique => true
